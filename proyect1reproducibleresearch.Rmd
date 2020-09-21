@@ -77,6 +77,8 @@ prom2<-mean(dfpasosdia$Pasos)
 med2<-median(dfpasosdia$Pasos)
 
 ```
+For the missing values I used the mean of steps for that interval.
+
 The number of NA's in Steps is `r nas`.
 
 The mean with missing values is `r prom` , and the mean without missig values is `r prom2`.
