@@ -1,0 +1,120 @@
+---
+title: "REPRODUCIBLE RESEARCH PROYECT 1"
+author: "JBRA"
+date: "20/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading Data
+
+Loading activity.csv
+
+```{r loading}
+y<-file("activity.csv")
+dfactivity<-read.csv(y)
+```
+
+## Mean
+
+```{r mean}
+dias<-unique(dfactivity$date)
+ld<-length(dias)
+dfpasosdia<-data.frame(Dia=dias,Pasos=NA)
+for (i in 1:ld){
+  pdias<-subset(dfactivity, date==dias[i])
+  pasosdia<-sum(pdias$steps, na.rm=TRUE)
+  dfpasosdia[i,2]<-pasosdia
+}
+hist(dfpasosdia$Pasos)
+prom<-mean(dfpasosdia$Pasos)
+med<-median(dfpasosdia$Pasos)
+
+```
+
+The mean of the total number of steps taken per day is `r prom`.
+The median of the total number of steps taken per day is `r med`.
+
+
+## INTERVAL
+```{r interval}
+int<-unique(dfactivity$interval)
+li<-length(int)
+dfpasosint<-data.frame(Intervalo=int,PromedioPasos=NA)
+for (i in 1:li){
+  pint<-subset(dfactivity, interval==int[i])
+  meanpasosint<-mean(pint$steps, na.rm=TRUE)
+  dfpasosint[i,2]<-meanpasosint
+}
+mx<-max(dfpasosint)
+plot(dfpasosint)
+```
+The maximum average number of steps was in the `r mx` interval.
+
+## MISSIN DATA
+```{r NA}
+nas<-sum(is.na (dfactivity$steps))
+rows<-nrow(dfactivity)
+for (i in 1:rows){
+  if (is.na(dfactivity[i,1])){
+    x<-subset(dfpasosint, Intervalo==dfactivity[i,3])
+    dfactivity[i,1]<-x$PromedioPasos
+  }
+}
+dias<-unique(dfactivity$date)
+ld<-length(dias)
+dfpasosdia2<-data.frame(Dia=dias,Pasos=NA)
+for (i in 1:ld){
+  pdias<-subset(dfactivity, date==dias[i])
+  pasosdia<-sum(pdias$steps, na.rm=TRUE)
+  dfpasosdia2[i,2]<-pasosdia
+}
+hist(dfpasosdia2$Pasos)
+prom2<-mean(dfpasosdia$Pasos)
+med2<-median(dfpasosdia$Pasos)
+
+```
+The number of NA's in Steps is `r nas`.
+
+The mean with missing values is `r prom` , and the mean without missig values is `r prom2`.
+The median with missing values is `r med`, and the median without missig values is `r med2`.
+
+The histogram with the missing values looks more as a normal distribution.
+
+## WEEKENDS
+
+```{r weekends}
+dfactivity[,2]<-as.Date(dfactivity[,2])
+dfdia<-(weekday=NA)
+dfactivity<-cbind(dfactivity,dfdia)
+rows<-nrow(dfactivity)
+for (i in 1:rows){
+  day<-weekdays(dfactivity[i,2])
+  if (day=="sábado" || day=="domingo"){
+    dfactivity[i,4]<-"Weekend"
+  }else{
+    dfactivity[i,4]<-"Weekday"
+  }
+}
+dfweekday<-subset(dfactivity, dfactivity[,4]=="Weekday")
+dfweekend<-subset(dfactivity, dfdia=="Weekend")
+dfpasosintweekday<-data.frame(Int=int,PromedioPasos=NA)
+dfpasosintweekend<-data.frame(Int=int,PromedioPasos=NA)
+for (i in 1:li){
+  pintweekday<-subset(dfweekday, interval==int[i])
+  meanpasosintweekday<-mean(pintweekday$steps, na.rm=TRUE)
+  dfpasosintweekday[i,2]<-meanpasosintweekday
+  pintweekend<-subset(dfweekend, interval==int[i])
+  meanpasosintweekend<-mean(pintweekend$steps, na.rm=TRUE)
+  dfpasosintweekend[i,2]<-meanpasosintweekend
+}
+y<-c(0,220)
+par(mfrow=c(2,1))
+par(mar=c(2,2,2,2))
+plot(dfpasosintweekday,main="WEEKDAY",ylim=y)
+plot(dfpasosintweekend, main ="WEEKEND",ylim=y)
+
+```
